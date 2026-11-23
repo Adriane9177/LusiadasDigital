@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'homepage',
+    'revisao',
 ]
 
 
@@ -139,6 +140,17 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(
     os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 )
+
+# Login da área de revisão (/revisao/)
+LOGIN_URL = "revisao:entrar"
+LOGIN_REDIRECT_URL = "revisao:painel"
+
+# Envio das correções ao GitHub (manage.py enviar_correcoes)
+REVISAO_REPO = os.getenv("REVISAO_REPO", "")            # clone do Git exclusivo para isso
+REVISAO_GITHUB = os.getenv("REVISAO_GITHUB", "brunomaroneze/LusiadasDigital")
+REVISAO_BASE = os.getenv("REVISAO_BASE", "develop")
+REVISAO_BRANCH = os.getenv("REVISAO_BRANCH", "correcoes-revisao")
+REVISAO_TOKEN = os.getenv("REVISAO_TOKEN", "")
 
 # Segurança em produção
 
