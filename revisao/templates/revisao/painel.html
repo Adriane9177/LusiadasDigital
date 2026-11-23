@@ -1,0 +1,31 @@
+{% extends "revisao/base.html" %}
+{% block conteudo %}
+<section>
+  <h1>{{ total.feitas }} de {{ total.total }} trechos revisados</h1>
+  <progress value="{{ total.feitas }}" max="{{ total.total|default:1 }}"></progress>
+  <p>{{ total.reais }} diferenças reais · {{ total.erros }} erros de transcrição · {{ total.duvidas }} dúvidas</p>
+  <form action="{% url 'revisao:proxima' %}" class="filtro">
+    <label>Canto <select name="canto"><option value="">todos</option>
+      {% for n in numeros %}<option>{{ n }}</option>{% endfor %}</select></label>
+    <label>Elemento <select name="elemento"><option value="">todos</option>
+      {% for v, r in elementos %}<option value="{{ v }}">{{ r }}</option>{% endfor %}</select></label>
+    <label>Tipo <select name="tipo"><option value="">todos</option>
+      {% for v, r in tipos %}<option value="{{ v }}">{{ r }}</option>{% endfor %}</select></label>
+    <button class="principal">Começar a revisar</button>
+  </form>
+</section>
+<section>
+  <h2>Por canto</h2>
+  <div class="rolavel"><table>
+    <tr><th>Canto</th><th>Trechos</th><th>Revisados</th><th>Reais</th><th>Erros</th><th>Dúvidas</th></tr>
+    {% for c in cantos %}<tr><td><a href="{% url 'revisao:proxima' %}?canto={{ c.canto }}">Canto {{ c.canto }}</a></td>
+    <td>{{ c.total }}</td><td>{{ c.feitas }}</td><td>{{ c.reais }}</td><td>{{ c.erros }}</td><td>{{ c.duvidas }}</td></tr>{% endfor %}
+  </table></div>
+</section>
+{% if duvidas %}<section><h2>Dúvidas em aberto</h2><ul>
+  {% for d in duvidas %}<li><a href="{% url 'revisao:revisar' d.pk %}?situacao=duvida">{{ d }}</a>: {{ d.comentario }} <small>({{ d.revisor|default:"?" }})</small></li>{% endfor %}
+</ul></section>{% endif %}
+{% if minhas %}<section><h2>Minhas últimas decisões</h2><ul>
+  {% for d in minhas %}<li><a href="{% url 'revisao:revisar' d.pk %}">{{ d }}</a>: {{ d.get_situacao_display }}</li>{% endfor %}
+</ul></section>{% endif %}
+{% endblock %}

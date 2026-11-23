@@ -1,0 +1,11 @@
+{% extends "revisao/base.html" %}
+{% block conteudo %}
+<form method="post" class="entrar">{% csrf_token %}
+  <h1>Entrar</h1>
+  {% if form.errors %}<p class="erro" role="alert">Usuário ou senha incorretos.</p>{% endif %}
+  <label>Usuário {{ form.username }}</label>
+  <label>Senha {{ form.password }}</label>
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="principal">Entrar</button>
+</form>
+{% endblock %}
