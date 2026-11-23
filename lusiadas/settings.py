@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'homepage',
+    'revisao',
 ]
 
 
@@ -139,6 +140,10 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(
     os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))
 )
+
+# Login da área de revisão (/revisao/)
+LOGIN_URL = "revisao:entrar"
+LOGIN_REDIRECT_URL = "revisao:painel"
 
 # Segurança em produção
 

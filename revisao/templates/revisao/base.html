@@ -1,0 +1,26 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{{ titulo|default:"Revisão" }} · Os Lusíadas</title>
+  <link href="{% static 'css/variables.css' %}" rel="stylesheet">
+  <link href="{% static 'css/revisao.css' %}" rel="stylesheet">
+</head>
+<body>
+<header class="topo">
+  <a href="{% url 'revisao:painel' %}"><strong>Revisão das transcrições</strong></a>
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'revisao:sair' %}">{% csrf_token %}
+    <span>{{ user.get_full_name|default:user.username }}</span> <button class="discreto">Sair</button>
+  </form>
+  {% endif %}
+</header>
+<main>
+  {% for m in messages %}<p class="aviso" role="status">{{ m }}</p>{% endfor %}
+  {% block conteudo %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% extends "revisao/base.html" %}
+{% load static %}
+{% block conteudo %}
+<div class="cabecalho">
+  <h1>{{ d }}</h1>
+  <span class="etiqueta">{{ d.get_tipo_display }}</span>
+  <span class="etiqueta">{{ d.get_situacao_display }}{% if d.revisor %} ({{ d.revisor }}){% endif %}</span>
+  <span class="zoom"><button type="button" data-zoom="0.8" aria-label="Diminuir">−</button>
+  <button type="button" data-zoom="1.25" aria-label="Aumentar">+</button>
+  <button type="button" data-recentrar>Voltar ao verso</button></span>
+</div>
+{% if outra_pessoa %}<p class="erro">{{ outra_pessoa }} está revisando este verso agora.</p>{% endif %}
+{% if not d.ativa %}<p class="aviso">Este verso não difere mais entre as duas versões.</p>{% endif %}
+{% if erro %}<p class="erro" role="alert">{{ erro }}</p>{% endif %}
+<form method="post" id="decisao">{% csrf_token %}
+  <input type="hidden" name="edicao" value="{{ edicao }}">
+  {% for k, v in filtros.items %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+  <div class="lados">
+  {% for lado in lados %}
+    <section class="lado">
+      <h2>{{ lado.nome }}</h2>
+      <div class="visor" data-altura="{{ lado.altura }}" tabindex="0" aria-label="Imagem da página, versão {{ lado.nome }}">
+        {% if lado.imagem %}<img src="{{ lado.imagem }}" alt="Página da versão {{ lado.nome }}" draggable="false">{% endif %}
+        <p class="sem-imagem"{% if lado.imagem %} hidden{% endif %}>Imagem não disponível.</p>
+      </div>
+      <p class="verso">{% for t, difere in lado.trechos %}{% if difere %}<mark>{{ t }}</mark>{% else %}{{ t }}{% endif %}{% endfor %}</p>
+      <label for="texto_{{ lado.id }}">Transcrição (corrija se necessário)</label>
+      <textarea id="texto_{{ lado.id }}" name="texto_{{ lado.id }}" rows="2" spellcheck="false" autocomplete="off" data-original="{{ lado.original }}">{{ lado.campo }}</textarea>
+      <div><button type="button" class="discreto" data-inserir="texto_{{ lado.id }}">Inserir quebra de linha</button>
+      <button type="button" class="discreto" data-restaurar="texto_{{ lado.id }}">Restaurar</button></div>
+    </section>
+  {% endfor %}
+  </div>
+  <label for="comentario">Comentário (obrigatório em caso de dúvida)</label>
+  <textarea id="comentario" name="comentario" rows="1">{{ comentario }}</textarea>
+  <div class="acoes">
+    <button name="acao" value="real" class="principal">Diferença real</button>
+    <button name="acao" value="erro" class="corrigir">Salvar correção</button>
+    <button name="acao" value="duvida">Dúvida</button>
+    <a href="{{ url_pular }}">Pular</a>
+  </div>
+  <p class="dica">Se a palavra estiver quebrada entre duas linhas, o hífen impresso vem antes de <code>&lt;lb break="no"/&gt;</code>. Sem hífen impresso, só a marca.</p>
+</form>
+{% if historico %}<details><summary>Histórico</summary><ul>
+{% for h in historico %}<li>{{ h.quando|date:"d/m/Y H:i" }}, {{ h.quem|default:"sistema" }}: {{ h.get_situacao_display }}{% if h.correcao_a %}; A → “{{ h.correcao_a }}”{% endif %}{% if h.correcao_b %}; B → “{{ h.correcao_b }}”{% endif %}{% if h.comentario %} ({{ h.comentario }}){% endif %}</li>{% endfor %}
+</ul></details>{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/revisao.js' %}"></script>{% endblock %}
