@@ -19,7 +19,7 @@ class DecisaoInline(admin.TabularInline):
 class DiferencaAdmin(admin.ModelAdmin):
     """Só consulta: as decisões são tomadas em /revisao/."""
     list_display = ("__str__", "tipo", "situacao", "ativa", "revisor", "revisado_em")
-    list_filter = ("situacao", "ativa", "canto", "tipo", "revisor")
+    list_filter = ("situacao", "elemento", "ativa", "canto", "tipo", "revisor")
     search_fields = ("xml_a", "xml_b", "comentario")
     inlines = [DecisaoInline]
 

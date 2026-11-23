@@ -25,6 +25,8 @@ def _filtros(dados):
         filtros["canto"] = dados["canto"]
     if dados.get("tipo") in Diferenca.Tipo.values:
         filtros["tipo"] = dados["tipo"]
+    if dados.get("elemento") in Diferenca.Elemento.values:
+        filtros["elemento"] = dados["elemento"]
     if dados.get("situacao") == S.DUVIDA:
         filtros["situacao"] = "duvida"
     return filtros
@@ -62,6 +64,7 @@ def painel(request):
         "total": ativas.aggregate(**contagens),
         "cantos": ativas.order_by("canto").values("canto").annotate(**contagens),
         "tipos": Diferenca.Tipo.choices,
+        "elementos": Diferenca.Elemento.choices,
         "numeros": range(1, 11),
         "duvidas": ativas.filter(situacao=S.DUVIDA).select_related("revisor"),
         "minhas": Diferenca.objects.filter(revisor=request.user).order_by("-revisado_em")[:15],
@@ -70,7 +73,7 @@ def painel(request):
 
 @login_required
 def proxima(request):
-    """Reserva o próximo verso livre e abre a tela dele."""
+    """Reserva o próximo verso livre e abre a tela dele (verso, título, cabeço, reclamo ou assinatura)."""
     filtros = _filtros(request.GET)
     fila = Diferenca.objects.filter(ativa=True, **{"situacao": S.PENDENTE, **filtros})
     depois = request.GET.get("depois", "")
@@ -78,8 +81,7 @@ def proxima(request):
     grupos = [fila]
     if atual:
         # a partir do verso atual; chegando ao fim, volta ao começo
-        seguintes = Q(canto__gt=atual.canto) | Q(canto=atual.canto, estrofe__gt=atual.estrofe) | Q(
-            canto=atual.canto, estrofe=atual.estrofe, verso__gt=atual.verso)
+        seguintes = Q(posicao__gt=atual.posicao)
         grupos = [fila.filter(seguintes), fila.exclude(seguintes).exclude(pk=atual.pk)]
         Diferenca.objects.filter(pk=atual.pk, reservado_por=request.user).update(
             reservado_por=None, reservado_em=None)
@@ -90,7 +92,7 @@ def proxima(request):
             if fila.filter(_livre(request.user), pk=pk).update(
                     reservado_por=request.user, reservado_em=timezone.now()):
                 return redirect(_com_filtros(reverse("revisao:revisar", args=[pk]), filtros))
-    messages.info(request, "Não há mais versos disponíveis com esse filtro.")
+    messages.info(request, "Não há mais trechos disponíveis com esse filtro.")
     return redirect("revisao:painel")
 
 
@@ -167,7 +169,7 @@ def _decidir(request, d, campo_a, campo_b, comentario):
             revisor=request.user, revisado_em=timezone.now(), ativa=True,
             reservado_por=None, reservado_em=None, edicao=F("edicao") + 1)
         if not gravou:
-            return "Este verso foi alterado enquanto você o revisava. Abra-o de novo antes de decidir."
+            return "Este trecho foi alterado enquanto você o revisava. Abra-o de novo antes de decidir."
         Decisao.objects.create(
             diferenca=d, quem=request.user, situacao=acao, xml_a=d.xml_a, xml_b=d.xml_b,
             correcao_a=correcao_a, correcao_b=correcao_b, comentario=comentario)

@@ -1,0 +1,24 @@
+name: Verificar textos e site
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      # inclui a conferência dos XMLs: bem-formados, 8816 versos, títulos e <fw>
+      - run: python manage.py test
+        env:
+          SECRET_KEY: so-para-os-testes
+          DEBUG: "True"
