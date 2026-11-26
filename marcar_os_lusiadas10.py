@@ -280,9 +280,6 @@ NOMES_REVISADOS = {
     (53, 'O claro descendente de Abraão'): [
         (23, 29, 'persName', 'hist', '#abraao'),
     ],
-    (53, 'Informações. A Ilha de Moçambique.'): [
-        (15, 33, 'placeName', 'real', '#mocambique'),
-    ],
     (54, 'De Quíloa, de Mombaça e de Sofala;'): [
         (3, 9, 'placeName', 'real', '#quiloa'),
         (14, 21, 'placeName', 'real', '#mombaca'),
